@@ -1,0 +1,75 @@
+#include "stdafx.h"
+#include <math.h>
+#include <iostream>
+
+double f1();
+double f2();
+double f3(double f1, double f2);
+double f4(double x, double a, double b);
+double f5(double x, double a, double b);
+void info();
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	info();
+	double x,a,b,Func1=f1(),Func2=f2(),Func3=f3(Func1,Func2),Func4,Func5;
+	printf("Часть I\n");
+	printf("Function1 = %10.6f | %E\n", Func1,Func1);
+	printf("Function2 = %10.6f | %E\n", Func2,Func2);
+	printf("Function3 = %10.6f | %E\n", Func3,Func3);
+	printf("Часть II\n");
+	printf("Введите значения переменных:\n");
+	printf("> x = ");
+	scanf("%lf", &x);
+	printf("> a = ");
+	scanf("%lf", &a);
+	printf("> b = ");
+	scanf("%lf", &b);
+	printf("Результат:\n");
+	Func4=f4(x,a,b);
+	Func5=f5(x,a,b);
+	printf("S(%g,%g,%g) = %10.6f | %E\n", x,a,b,Func4,Func4);
+	printf("Q(%g,%g,%g) = %10.6f | %E\n", x,a,b,Func5,Func5);
+	system("pause");
+}
+
+void info() {
+	printf("************[ О ПРОГРАММЕ ]***********\n");
+	printf("* Информация: Программа вычисляет    *\n");
+	printf("*             значения пяти функций. *\n");
+	printf("* Авторы: Дубровский А., Синицин М.  *\n");
+	printf("* Группа: КЭ-218                     *\n");
+	printf("*       Челябинск, ЮУрГУ, 2021       *\n");
+	printf("**************************************\n");
+}
+
+double f1() {
+	double res = cos(5.0)/(4-sqrt(11.0)) + sin(1.0)/(3+sqrt(7.0));
+	return res;
+}
+
+double f2() {
+	double res = 2*log(3.0)*(asin(5/13.0)+asin(12/13.0));
+	return res;
+}
+
+double f3(double f1, double f2) {
+	double res = abs(f1) <= 2*abs(f2) ? sqrt(3*f1*f1+4*f2*f2) : sqrt(3*f1*f1-4*f2*f2);
+	return res;
+}
+
+double f4(double x, double a, double b) {
+	if (x+b <= 0 || cos(pow(x+b,2)) == 0)
+		return 0;
+	double res = pow(x,3)*pow(tan(pow(x+b,2)),2)+2/sqrt(x+b);
+	return res;
+}
+
+double f5(double x, double a, double b) {
+	if (x==0 || a==0)
+		return 0;
+	double res = (b*x*x-a)/(exp(a*x*1.0)-1);
+	return res;
+}
+
