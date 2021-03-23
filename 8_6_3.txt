@@ -25,7 +25,7 @@ int main()
 	int i=0;
 	FILE *f;
 	info();
-    printf("Введите имя файла: ");
+   	printf("Введите имя файла: ");
 	scanf("%[^\n]",filename);
 	if ((f=fopen(filename,"r"))==NULL) {
 		printf("Ошибка! Не удалось открыть файл\n");
