@@ -1,0 +1,157 @@
+#include "stdafx.h"
+#include <iostream>
+#include <math.h>
+
+struct Point {
+	double x, y;
+};
+
+void info();
+double Dist(double x1,double y1,double x2,double y2);
+bool NonConvexFigure(Point A, Point B, Point C, Point D);
+bool IsSelfIntersectingFigure(Point A, Point B, Point C, Point D);
+bool Intersection(Point A, Point B, Point C, Point D);
+bool IsPointOnLine(Point A, Point B, Point C);
+bool QuadExists(Point A, Point B, Point C, Point D);
+bool Validator(Point A, Point B, Point C, Point D);
+double S(Point A, Point B, Point C, Point D);
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	Point A,B,C,D;
+	char filename[256];
+	double fread, Array[8];
+	int i=0;
+	FILE *f;
+	info();
+    printf("Введите имя файла: ");
+	scanf("%[^\n]",filename);
+	if ((f=fopen(filename,"r"))==NULL) {
+		printf("Ошибка! Не удалось открыть файл\n");
+		system("pause");
+	}
+	printf("Распознаю содержимое файла \"%s\":\n", filename);
+	while (fscanf(f,"%lf",&fread)>0 && i<8) {
+		Array[i] = fread;
+		i++;
+	}
+	fclose(f);
+	if (i != 8) {
+		printf("Ошибка! В файле не содержится достаточного количества данных\n");
+		system("pause");
+	}
+	A.x=Array[0];A.y=Array[1];B.x=Array[2];B.y=Array[3];C.x=Array[4];C.y=Array[5];D.x=Array[6];D.y=Array[7];
+	printf("  точки A(%g;%g), B(%g;%g), C(%g;%g), D(%g;%g) заданы успешно!\n",A.x,A.y,B.x,B.y,C.x,C.y,D.x,D.y);
+	if (Validator(A,B,C,D))
+		printf("> Площадь невыпуклого четырёхугольника ABCD = %g ед.^2\n", S(A,B,C,D));
+	system("pause");
+}
+
+void info() {
+	printf("************[ О ПРОГРАММЕ ]***********\n");
+	printf("* Информация: Программа вычисляет S  *\n");
+	printf("*             невыпуклого 4хугольника*\n");
+	printf("* Авторы: Дубровский А., Синицин М.  *\n");
+	printf("* Группа: КЭ-218                     *\n");
+	printf("*       Челябинск, ЮУрГУ, 2021       *\n");
+	printf("**************************************\n");
+}
+
+double Dist(double x1,double y1,double x2,double y2) {
+	double temp=sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+	return temp;
+}
+
+bool IsNonConvexFigure(Point A, Point B, Point C, Point D) {
+	bool Sign1 = (A.x - B.x)*(C.y - B.y) > (A.y - B.y)*(C.x - B.x);
+	bool Sign2 = (B.x - C.x)*(D.y - C.y) > (B.y - C.y)*(D.x - C.x);
+	bool Sign3 = (C.x - D.x)*(A.y - D.y) > (C.y - D.y)*(A.x - D.x);
+	bool Sign4 = (D.x - A.x)*(B.y - A.y) > (D.y - A.y)*(B.x - A.x);
+	if (Sign2==Sign1 && Sign3==Sign1 && Sign4==Sign1)
+		return false;
+	else
+		return true;
+}
+
+bool Intersection(Point A, Point B, Point C, Point D) {
+	double Ua, Ub, numerator_a, numerator_b, denominator;
+
+    denominator=(D.y-C.y)*(A.x-B.x)-(D.x-C.x)*(A.y-B.y);
+    if (denominator == 0) {
+        if ( (A.x*B.y-B.x*A.y)*(D.x-C.x) - (C.x*D.y-D.x*C.y)*(B.x-A.x) == 0 && (A.x*B.y-B.x*A.y)*(D.y-C.y) - (C.x*D.y-D.x*C.y)*(B.y-A.y) == 0)
+            return true;
+        else return false;
+    }
+    else {
+        numerator_a=(D.x-B.x)*(D.y-C.y)-(D.x-C.x)*(D.y-B.y);
+        numerator_b=(A.x-B.x)*(D.y-B.y)-(D.x-B.x)*(A.y-B.y);
+        Ua=numerator_a/denominator;
+        Ub=numerator_b/denominator;
+        if(Ua >=0 && Ua <=1 && Ub >=0 && Ub <=1)
+			return true;
+		else
+			return false;
+    }
+}
+
+bool IsSelfIntersectingFigure(Point A, Point B, Point C, Point D) {
+    if (Intersection(A,B,C,D) || Intersection(A,D,B,C))
+		return true;
+	else
+		return false;
+}
+
+bool IsPointOnLine(Point A, Point B, Point C) {
+	double d1,d2,d3;
+	d1=Dist(A.x,A.y,B.x,B.y);
+	d2=Dist(A.x,A.y,C.x,C.y);
+	d3=Dist(B.x,B.y,C.x,C.y);
+	if (d1+d2==d3 || d1+d3==d2 || d2+d3==d1 ) 
+		return true;
+	else return false;
+}
+
+bool QuadExists(Point A, Point B, Point C, Point D) {
+	bool flag1 = !IsPointOnLine(A,B,C);
+	bool flag2 = !IsPointOnLine(A,B,D);
+	bool flag3 = !IsPointOnLine(B,C,A);
+	bool flag4 = !IsPointOnLine(B,C,D);
+	bool flag5 = !IsPointOnLine(C,D,B);
+	bool flag6 = !IsPointOnLine(C,D,A);
+	bool flag7 = !IsPointOnLine(D,A,B);
+	bool flag8 = !IsPointOnLine(D,A,C);
+	if (flag1 && flag2 && flag3 && flag4 && flag5 && flag6 && flag7 && flag8)
+		return true;
+	else
+		return false;
+}
+
+bool Validator(Point A, Point B, Point C, Point D) {
+	if (!QuadExists(A,B,C,D)) {
+		printf("Ошибка! Указанные точки A(%g,%g), B(%g,%g), C(%g,%g), D(%g,%g) не задают четырёхугольник\n", A.x,A.y,B.x,B.y,C.x,C.y,D.x,D.y);
+		return false;
+	}
+	if (IsSelfIntersectingFigure(A,B,C,D)) {
+		printf("Ошибка! Тип четырёхугольника: самопересекающийся\n");
+		return false;
+	}
+	if (!IsNonConvexFigure(A,B,C,D)) {
+		printf("Ошибка! Тип четырёхугольника: выпуклый\n");
+		return false;
+	}
+	return true;
+}
+
+double S(Point A, Point B, Point C, Point D) {
+	int i;
+	double res, sum1=0, sum2=0, X[4], Y[4];
+	X[0] = A.x; X[1] = B.x; X[2] = C.x; X[3] = D.x;
+	Y[0] = A.y; Y[1] = B.y; Y[2] = C.y; Y[3] = D.y;
+	for (i=1; i<=3; i++)
+		sum1 += X[i -1] * Y[i+1 -1];
+	for (i=1; i<=3; i++)
+		sum2 += X[i+1 -1] * Y[i -1];
+	res = 0.5 * abs(sum1 + X[4 -1]*Y[1 -1] - sum2 - X[1 -1]*Y[4 -1]);
+	return res;
+}
