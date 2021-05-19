@@ -1,0 +1,229 @@
+#include "stdafx.h"
+#include <iostream>
+#include <ctime>
+
+void info();
+double random(double min, double max, int accuracy);
+
+class MatrixOperations {
+public:
+	void Function1(double** Matrix, int Height, int Width, double* OutputSum, int* OutputStr, int &count);
+	void Function2(double** Matrix, int Height, int Width, int* OutputI, int* OutputJ, int &count);
+};
+
+void MatrixOperations::Function1(double** Matrix, int Height, int Width, double* OutputSum, int* OutputStr, int &count) {
+	count = 0;
+	int i,j;
+	double sum;
+	bool NegativeElement;
+	for (i=0; i<Height; i++) {
+		sum=0;
+		NegativeElement=false;
+		for (j=0; j<Width; j++) {
+			sum += Matrix[i][j];
+			if (Matrix[i][j] < 0)
+				NegativeElement=true;
+		}
+		if (NegativeElement) {
+			OutputSum[count] = sum;
+			OutputStr[count] = i;
+			count++;
+		}
+	}
+	return;
+}
+
+void MatrixOperations::Function2(double** Matrix, int Height, int Width, int* OutputI, int* OutputJ, int &count) {
+	int i,j;
+	count=0;
+	double min,max;
+	double *MinJ4I = new double [Height];
+	double *MaxI4J = new double [Width];
+	MinJ4I[1] = Matrix[1][1];
+	for (i=0; i<Height; i++) {
+		MinJ4I[i] = Matrix[i][0];
+		for (j=1; j<Width; j++)
+			if (Matrix[i][j] < MinJ4I[i])
+				MinJ4I[i] = Matrix[i][j];
+	}
+	for (j=0; j<Width; j++) {
+		MaxI4J[j] = Matrix[0][j];
+		for (i=0; i<Height; i++)
+			if (Matrix[i][j] > MaxI4J[j])
+				MaxI4J[j] = Matrix[i][j];
+	}
+	for (i=0; i<Height; i++)
+		for (j=0; j<Width; j++)
+			if (MinJ4I[i] == Matrix[i][j] && MaxI4J[j] == Matrix[i][j]) {
+				OutputI[count] = i;
+				OutputJ[count] = j;
+				count++;
+			}
+	delete [] MinJ4I;
+	delete [] MaxI4J;
+	return;
+}
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	srand(time(NULL));
+	int select,i,j,count,Height, Width, NumSigns, countSaddle, countStrings;
+	double Value, BottomBorder, UpperBorder;
+	bool ExitMode;
+	char filename[256];
+	MatrixOperations CurrentMatrix;
+	while (true) {
+		system("cls");
+		info();
+		ExitMode = false;
+		i=0;
+		do {
+			if (i)
+				printf("Ошибка! ");
+			printf("Выберите желаемое действие:\n");
+			printf(" [1] Чтение матрицы из файла\n");
+			printf(" [2] Заполнение матрицы случайными значениями\n");
+			printf(" [3] Завершение работы\n");
+			printf("> ");
+			scanf(" %i", &select);
+			i++;
+		} while (select<1 || select>3);
+		if (select == 3)
+			break;
+		system("cls");
+		printf("Вы выбрали:");
+		switch(select) {
+			case 1: printf(" [1] Чтение матрицы из файла\n"); break;
+			case 2: printf(" [2] Заполнение матрицы случайными значениями\n"); break;
+		}
+		printf("Введите имя файла с данными:\n");
+		scanf(" %[^\n]",filename);
+		FILE *f1;
+		if ((f1=fopen(filename,"r"))==NULL)
+			printf("Ошибка чтения файла. Попробуйте ещё раз\n");
+		else {
+			fscanf(f1,"%i",&Height);
+			fscanf(f1,"%i",&Width);
+			if (Height>0 && Width>0) {
+				printf("Размер матрицы: %iх%i\n", Height,Width);
+				double **arr = new double* [Height];
+				for (i=0; i<Height; i++) {
+					arr[i] = new double [Width];
+					if (arr[i] == NULL)
+						return false;
+				}
+				if (select == 1) {
+					i=0;
+					j=0;
+					count=0;
+					while (fscanf(f1,"%lf", &Value)>0 && count<Height*Width) {
+						count++;
+						arr[i][j] = Value;
+						j++;
+						if (Width == j) {
+							j=0;
+							i++;
+						}
+					}
+					
+					if (Height*Width != count) {
+						ExitMode = true;
+						printf("Ошибка! Неверное количество элементов матрицы\n");
+					}
+					else
+						printf("Считана матрица A = {\n");
+				}
+				else if (select == 2) {
+					printf("Введите диапазон генерируемых чисел:\nОт: ");
+					scanf(" %lf", &BottomBorder);
+					printf("До: ");
+					scanf(" %lf", &UpperBorder);
+					printf("Количество знаков после запятой: ");
+					scanf("%i", &NumSigns);
+					for (i=0; i<Height; i++)
+						for (j=0; j<Width; j++)
+							arr[i][j] = random(BottomBorder, UpperBorder, NumSigns);
+					printf("Сгенерирована матрица A = {\n");
+				}
+				if (!ExitMode) {
+					for (i=0; i<Height; i++) {
+						for (j=0; j<Width; j++)
+							printf("%11.4g   ", arr[i][j]);
+						printf("\n");
+					}
+					printf("}\n");
+					// ОСНОВНАЯ ЧАСТЬ
+					printf("Задание 1\n");
+					double *SumArr = new double [Height];
+					int *StrArr = new int [Height];
+					CurrentMatrix.Function1(arr,Height,Width, SumArr, StrArr,countStrings);
+					for (i=0; i<countStrings; i++)
+						printf("Строка %i: сумма = %11.4g\n", StrArr[i]+1, SumArr[i]);
+					if (countStrings == 0)
+						printf("Заданная матрица A не содержит отрицательных элементов\n");
+					delete [] SumArr;
+					delete [] StrArr;
+					printf("Задание 2\n");
+					int *SaddleI = new int [Height*Width];
+					int *SaddleJ = new int [Height*Width];
+					CurrentMatrix.Function2(arr,Height,Width,SaddleI,SaddleJ,countSaddle);
+					for (i=0; i<countSaddle; i++)
+						printf("A[%i][%i] = %g является седловой точкой\n", SaddleI[i]+1,SaddleJ[i]+1,arr[SaddleI[i]][SaddleJ[i]]);
+					if (countSaddle == 0)
+						printf("Заданная матрица A не имеет седловых точек\n");
+					delete [] SaddleI;
+					delete [] SaddleJ;
+					for (i=0; i<Height; i++)
+						delete [] arr[i];
+				}
+			}
+			else
+				printf("Ошибка! Размер матрицы указан неверно");
+		}
+
+		i=0;
+		do {
+			if (i)
+				printf("Ошибка! ");
+			printf("Программа выполнена. Что дальше?\n");
+			printf(" [1] Завершение работы\n");
+			printf(" [2] Продолжить работу\n");
+			printf("> ");
+			scanf("%i", &select);
+			i++;
+		} while (select<1 || select>2);
+		if (select == 1)
+			break;
+	}
+	system("pause");
+	return true;
+}
+
+void info() {
+	printf("****************[ О ПРОГРАММЕ ]**************\n");
+	printf("* Информация: Программа определяет седловые *\n");
+	printf("* точки матрицы, считает суммы некот. строк *\n");
+	printf("* Авторы: Дубровский А., Синицин М.         *\n");
+	printf("* Группа: КЭ-218                            *\n");
+	printf("*           Челябинск, ЮУрГУ, 2021          *\n");
+	printf("*********************************************\n");
+}
+
+double random(double min, double max, int accuracy) {
+	if (min == max)
+		return max;
+	if (accuracy < 0)
+		return 0;
+	int intMin, intMax, accuracy10 = (int)pow(10.0, accuracy);
+	double tmp,dRnd;
+	if(min > max) {
+		tmp = min;
+		min = max;
+		max = tmp;
+	}
+	intMin = (int) (min * accuracy10);
+	intMax = (int) (max * accuracy10);
+	dRnd = (double) (rand() % abs(intMax - intMin) + intMin) / accuracy10;
+	return dRnd;
+}
