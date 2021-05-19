@@ -1,0 +1,190 @@
+==========================================[ФАЙЛ Main.cpp]==========================================
+#include "stdafx.h"
+#include <iostream>
+#include <math.h>
+
+#include "MatrixA.h"
+#include "VectorX.h"
+#include "FunctionG.h"
+
+void info();
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	char filename1[256], filename2[256], filename3[256], filename4[256];
+	int ErrorLevel, i;
+	info();
+    printf("Введите по порядку имена четырёх файлов:\n");
+	scanf(" %[^\n]",filename1);
+	scanf(" %[^\n]",filename2);
+	scanf(" %[^\n]",filename3);
+	scanf(" %[^\n]",filename4);
+	ErrorLevel = MatrixA(filename1, filename2);
+	if (ErrorLevel >= 0)
+	{
+		int MatrixSize = ErrorLevel;
+		ErrorLevel = VectorX(MatrixSize, filename2, filename3);
+		if (ErrorLevel >= 0) {
+			ErrorLevel = FunctionG(MatrixSize, filename3, filename4);
+			if (ErrorLevel >= 0) {
+				printf("Функции успешно выполнены! Вывожу результаты\n");
+				FILE *f1, *f2, *f3, *f4;
+				if ((f2=fopen(filename2,"rb"))==NULL || (f3=fopen(filename3,"rb"))==NULL || (f4=fopen(filename4,"rb"))==NULL) {
+					printf("Ошибка при работе с файлами\n");
+					system("pause");
+					return false;
+				}
+				printf("Размер матрицы: %iх%i\n", MatrixSize,MatrixSize);
+				printf("Элементы квадратной матрицы A = {\n");
+				double Value;
+				i=0;
+				while (fread(&Value,sizeof(Value),1,f2)>0) {
+					i++;
+					printf("%11.4g   ", Value);
+					if (MatrixSize == i) {
+						i=0;
+						printf("\n");
+					}
+				}
+				printf("}\n");
+				printf("Компоненты вектора X =\n{ ");
+				while (fread(&Value,sizeof(Value),1,f3)>0)
+					printf("%11.4g   ", Value);
+				printf(" }\n");
+				fread(&Value,sizeof(Value),1,f4);
+				printf("Значение u = G(X) = %11.4g\n", Value);
+				system("pause");
+				return true;
+			}
+		}
+	}
+	if (ErrorLevel == -1)
+		printf("Ошибка при работе с файлами\n");
+	else if (ErrorLevel == -2)
+		printf("Ошибка размера матрицы\n");
+	else if (ErrorLevel == -3)
+		printf("Ошибка при выделении памяти\n");
+	else
+		printf("Неизвестная ошибка #%i\n", ErrorLevel);
+	system("pause");
+	return false;
+}
+
+void info() {
+	printf("************[ О ПРОГРАММЕ ]***************\n");
+	printf("* Информация: Программа строит матрицу A,*\n");
+	printf("* получет комп. вектора X, вычисляет u   *\n");
+	printf("* Авторы: Дубровский А., Синицин М.      *\n");
+	printf("* Группа: КЭ-218                         *\n");
+	printf("*         Челябинск, ЮУрГУ, 2021         *\n");
+	printf("******************************************\n");
+}
+
+==========================================[ФАЙЛ MatrixA.h]==========================================
+#pragma once
+int MatrixA(char filename1[256], char filename2[256]);
+
+=========================================[ФАЙЛ MatrixA.cpp]=========================================
+#include "MatrixA.h"
+#include "stdafx.h"
+#include <iostream>
+
+int MatrixA(char filename1[256], char filename2[256]) {
+	int MatrixSize,i,j;
+	double Value;
+	FILE *f1, *f2;
+	if ((f1=fopen(filename1,"r"))==NULL || (f2=fopen(filename2,"w+b"))==NULL)
+		return -1;
+	fscanf(f1,"%i",&MatrixSize);
+	if (MatrixSize <= 0)
+		return -2;
+	double **arr = new double* [MatrixSize];
+	for (i=0; i<MatrixSize; i++) {
+		arr[i] = new double [MatrixSize];
+		if (arr[i] == NULL)
+			return -3;
+	}
+	for (i=1; i<=MatrixSize; i++)
+		for (j=1; j<=MatrixSize; j++)
+			arr[i-1][j-1] = (abs(j-3.0)-1.3)*(6.5-j)*pow(2.0,j-1.0)*(2*abs(3.3-i)-1.5);
+	for (i=0; i<MatrixSize; i++)
+		for (j=0; j<MatrixSize; j++) {
+			Value = arr[i][j];
+			fwrite(&Value,sizeof(Value),1,f2);
+		}
+	for (i=0; i<MatrixSize; i++)
+		delete [] arr[i];
+	fclose(f1);
+	fclose(f2);
+	return MatrixSize;
+}
+
+==========================================[ФАЙЛ VectorX.h]==========================================
+#pragma once
+int VectorX(int MatrixSize, char filename2[256], char filename3[256]);
+
+=========================================[ФАЙЛ VectorX.cpp]=========================================
+#include "VectorX.h"
+#include "stdafx.h"
+#include <iostream>
+
+int VectorX(int MatrixSize, char filename2[256], char filename3[256]) {
+	double Value,min,max;
+	int i,j;
+	FILE *f2, *f3;
+	if ((f2=fopen(filename2,"rb"))==NULL || (f3=fopen(filename3,"w+b"))==NULL)
+		return -1;
+	double *vec = new double [MatrixSize];
+	if (vec == NULL)
+		return -3;
+	fread(&Value,sizeof(Value),1,f2);
+	min = Value;
+	max = Value;
+	i=1;
+	j=0;
+	while (fread(&Value,sizeof(Value),1,f2)>0) {
+		i++;
+		if (Value < min)
+			min = Value;
+		if (Value > max)
+			max = Value;
+		if (MatrixSize == i) {
+			i=1;
+			vec[j] = abs(max) - abs(min);
+			j++;
+			fread(&Value,sizeof(Value),1,f2);
+			min = Value;
+			max = Value;
+		}
+	}
+	for (i=0; i<MatrixSize; i++)
+		fwrite(&vec[i],sizeof(vec[i]),1,f3);
+	fclose(f2);
+	fclose(f3);
+	delete [] vec;
+	return 0;
+}
+
+=========================================[ФАЙЛ FunctionG.h]=========================================
+#pragma once
+int FunctionG(int MatrixSize, char filename3[256], char filename4[256]);
+
+========================================[ФАЙЛ FunctionG.cpp]========================================
+#include "FunctionG.h"
+#include "stdafx.h"
+#include <iostream>
+
+int FunctionG(int MatrixSize, char filename3[256], char filename4[256]) {
+	double Value,max=-1;
+	FILE *f3, *f4;
+	if ((f3=fopen(filename3,"rb"))==NULL || (f4=fopen(filename4,"w+b"))==NULL)
+		return -1;
+	while (fread(&Value,sizeof(Value),1,f3)>0)
+		if (abs(Value) > max)
+			max = abs(Value);
+	fwrite(&max,sizeof(max),1,f4);
+	fclose(f3);
+	fclose(f4);
+	return 0;
+}
