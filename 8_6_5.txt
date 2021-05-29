@@ -39,7 +39,6 @@ void MatrixOperations::Function2(double** Matrix, int Height, int Width, int* Ou
 	double min,max;
 	double *MinJ4I = new double [Height];
 	double *MaxI4J = new double [Width];
-	MinJ4I[1] = Matrix[1][1];
 	for (i=0; i<Height; i++) {
 		MinJ4I[i] = Matrix[i][0];
 		for (j=1; j<Width; j++)
