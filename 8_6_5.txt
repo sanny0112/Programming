@@ -47,7 +47,7 @@ void MatrixOperations::Function2(double** Matrix, int Height, int Width, int* Ou
 	}
 	for (j=0; j<Width; j++) {
 		MaxI4J[j] = Matrix[0][j];
-		for (i=0; i<Height; i++)
+		for (i=1; i<Height; i++)
 			if (Matrix[i][j] > MaxI4J[j])
 				MaxI4J[j] = Matrix[i][j];
 	}
