@@ -1,0 +1,125 @@
+#include "stdafx.h"
+#include <iostream>
+#include <math.h>
+
+class Vector {
+private:
+	double X, Y, Z;
+public:
+	Vector(double x, double y, double z) {
+		X = x;
+		Y = y;
+		Z = z;
+	}
+
+	Vector operator +(Vector b){
+        return Vector(X + b.X, Y + b.Y, Z + b.Z);
+    }
+	
+	Vector operator -(Vector b){
+        return Vector(X - b.X, Y - b.Y, Z - b.Z);
+    }
+
+	double operator *(Vector b){
+        return (X * b.X + Y * b.Y + Z * b.Z);
+    }
+
+	double getLength() {
+		return sqrt(X*X + Y*Y + Z*Z);
+	}
+
+	double getCos(Vector a, Vector b) {
+		if (a.getLength() != 0 && b.getLength() != 0)
+			return (a*b) / (a.getLength() * b.getLength());
+		return 0;
+    }
+
+	void output(double &x1, double &y1, double &z1) {
+		x1 = X;
+		y1 = Y;
+		z1 = Z;
+		return;
+	}
+};
+
+void info();
+void getCoordinates (double &x2, double &y2, double &z2);
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	int select;
+	double X, Y, Z, len1, len2, Mult, Cos;
+	info();
+	while (true) {
+		printf("Выберите желаемое действие:\n");
+		printf(" [1] Ввести векторы\n");
+		printf(" [2] Завершение работы\n");
+		printf("> ");
+		scanf(" %i", &select);
+		system("cls");
+		switch(select) {
+			default: {
+				printf("Ошибка! ");
+				continue;
+			}
+			case 2: {
+				printf("Вы выбрали: [2] Завершение работы\n");
+				system("pause"); return true;
+			}
+			case 1: {
+				printf("Вы выбрали: [1] Ввести векторы\n");
+				break;
+			}
+		}
+		printf("Первый вектор\n");
+		getCoordinates(X,Y,Z);
+		Vector v1 = Vector(X,Y,Z);
+		printf("Второй вектор\n");
+		getCoordinates(X,Y,Z);
+		Vector v2 = Vector(X,Y,Z);
+		system("cls");
+		len1 = v1.getLength();
+		v1.output(X,Y,Z);
+		printf("Вектор 1: {%.2g, %.2g, %.2g}\nДлина: %g\n\n", X,Y,Z,len1);
+		len2 = v2.getLength();
+		v2.output(X,Y,Z);
+		printf("Вектор 2: {%.2g, %.2g, %.2g}\nДлина: %g\n\n", X,Y,Z,len2);
+		Vector Sum = v1 + v2;
+		Sum.output(X,Y,Z);
+		printf("Сумма: {%.2g, %.2g, %.2g}\n", X,Y,Z);
+		Vector Dif = v1 - v2;
+		Dif.output(X,Y,Z);
+		printf("Разность: {%.2g, %.2g, %.2g}\n", X,Y,Z);
+		Mult = v1 * v2;
+		printf("Скалярное произведение: %g\n", Mult);
+		if (len1 != 0 && len2 != 0) {
+			Cos = v1.getCos(v1,v2);
+			printf("Косинус: %g\n\n", Cos);
+		}
+		else
+			printf("Так как один из вектров - нулевой вектор, то невозможно найти угол между векторами!\n\n");
+	}
+	system("pause");
+	return true;
+}
+
+void info() {
+	printf("****************[ О ПРОГРАММЕ ]**************\n");
+	printf("* Информация: Программа выполняет различные *\n");
+	printf("*             операции над векторами        *\n");
+	printf("* Авторы: Дубровский А., Синицин М.         *\n");
+	printf("* Группа: КЭ-218                            *\n");
+	printf("*           Челябинск, ЮУрГУ, 2021          *\n");
+	printf("*********************************************\n");
+}
+
+void getCoordinates (double &x2, double &y2, double &z2) {
+	printf(" Введите координаты:\nx = ");
+	scanf(" %lf", &x2);
+	printf("y = ");
+	scanf(" %lf", &y2);
+	printf("z = ");
+	scanf(" %lf", &z2);
+	return;
+}
