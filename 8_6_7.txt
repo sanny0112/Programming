@@ -81,16 +81,16 @@ int main()
 		system("cls");
 		len1 = v1.getLength();
 		v1.output(X,Y,Z);
-		printf("Вектор 1: {%.2g, %.2g, %.2g}\nДлина: %g\n\n", X,Y,Z,len1);
+		printf("Вектор 1: {%g, %g, %g}\nДлина: %g\n\n", X,Y,Z,len1);
 		len2 = v2.getLength();
 		v2.output(X,Y,Z);
-		printf("Вектор 2: {%.2g, %.2g, %.2g}\nДлина: %g\n\n", X,Y,Z,len2);
+		printf("Вектор 2: {%g, %.2g, %g}\nДлина: %g\n\n", X,Y,Z,len2);
 		Vector Sum = v1 + v2;
 		Sum.output(X,Y,Z);
-		printf("Сумма: {%.2g, %.2g, %.2g}\n", X,Y,Z);
+		printf("Сумма: {%g, %g, %g}\n", X,Y,Z);
 		Vector Dif = v1 - v2;
 		Dif.output(X,Y,Z);
-		printf("Разность: {%.2g, %.2g, %.2g}\n", X,Y,Z);
+		printf("Разность: {%g, %g, %g}\n", X,Y,Z);
 		Mult = v1 * v2;
 		printf("Скалярное произведение: %g\n", Mult);
 		if (len1 != 0 && len2 != 0) {
