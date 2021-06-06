@@ -139,7 +139,7 @@ int main()
 			}
 			case 4: {
 				printf("Вы выбрали: [4] Список автобусов в парке\n");
-				Bus * bnew = Obj;
+				BusNode bnew = Obj;
 				i=0;
 				while (bnew) {
 					if (!(bnew->OnRoute)) {
@@ -161,7 +161,7 @@ int main()
 			}
 			case 5: {
 				printf("Вы выбрали: [5] Список автобусов на маршруте\n");
-				Bus * bnew = Obj;
+				BusNode bnew = Obj;
 				i=0;
 				while (bnew) {
 					if (bnew->OnRoute) {
