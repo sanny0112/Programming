@@ -19,7 +19,7 @@ public:
 };
 
 void Buses::addBus(BusNode &Head, Bus Object) {
-	Bus *bnew = new Bus;
+	BusNode bnew = new Bus;
 	strcpy(bnew->Number, Object.Number);
 	strcpy(bnew->DriverName, Object.DriverName);
 	bnew->Route = Object.Route;
@@ -39,7 +39,7 @@ void Buses::addBus(BusNode &Head, Bus Object) {
 }
 
 int Buses::sendBus(BusNode &Head, char Number[]) {
-	Bus * bnew = Head;
+	BusNode bnew = Head;
 	while (bnew) {
 		if (strcmp(bnew->Number, Number) == 0) {
 			if (bnew->OnRoute) {
