@@ -28,7 +28,7 @@ void Buses::addBus(BusNode &Head, Bus Object) {
 	if (Head == NULL)
 		Head = bnew;
 	else {
-		Bus *R = Head,*P = Head->next;
+		BusNode R = Head,P = Head->next;
 		while (P) {
 			R = P;
 			P = P->next;
