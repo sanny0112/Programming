@@ -1,0 +1,200 @@
+#include "stdafx.h"
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+
+struct Bus {
+	char Number[16];
+	char DriverName[128];
+	int Route;
+	bool OnRoute;
+	Bus *next;
+};
+typedef Bus * BusNode;
+
+class Buses {
+public:
+	void addBus(BusNode &Head, Bus Object);
+	int sendBus(BusNode &Head, char Number[]);
+};
+
+void Buses::addBus(BusNode &Head, Bus Object) {
+	Bus *bnew = new Bus;
+	strcpy(bnew->Number, Object.Number);
+	strcpy(bnew->DriverName, Object.DriverName);
+	bnew->Route = Object.Route;
+	bnew->OnRoute = false;
+	bnew->next = 0;
+	if (Head == NULL)
+		Head = bnew;
+	else {
+		Bus *R = Head,*P = Head->next;
+		while (P) {
+			R = P;
+			P = P->next;
+		}
+		R->next = bnew;
+	}
+	return;
+}
+
+int Buses::sendBus(BusNode &Head, char Number[]) {
+	Bus * bnew = Head;
+	while (bnew) {
+		if (strcmp(bnew->Number, Number) == 0) {
+			if (bnew->OnRoute) {
+				bnew->OnRoute = false;
+				return 0;
+			}
+			else {
+				bnew->OnRoute = true;
+				return 1;
+			}
+		}
+		bnew = bnew->next;
+	}
+	return -1;
+}
+
+void info();
+
+int main()
+{
+	setlocale(LC_ALL, "Russian");
+	{SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);}
+	Buses Station;
+	BusNode Obj=0;
+	Bus AddObj;
+	FILE *f1;
+	char Number[16], filename[256];
+	int select,i,Out;
+	while (true) {
+		system("cls");
+		info();
+		printf("Выберите желаемое действие:\n");
+		printf(" [1] Добавить автобус\n");
+		printf(" [2] Считать данные из файла\n");
+		printf(" [3] Отправить/снять автобус с рейса\n");
+		printf(" [4] Список автобусов в парке\n");
+		printf(" [5] Список автобусов на маршруте\n");
+		printf(" [6] Завершение работы\n");
+		printf("> ");
+		scanf(" %i", &select);
+		system("cls");
+		switch(select) {
+			default: {
+				printf("Ошибка! ");
+				continue;
+			}
+			case 6: {
+				printf("Вы выбрали: [6] Завершение работы\n");
+				system("pause"); return true;
+			}
+			case 1: {
+				printf("Вы выбрали: [1] Добавить автобус\n");
+				printf(" Номер автобуса: ");
+				scanf(" %[^\n]", &AddObj.Number);
+				printf(" Фамилия И.О. водителя: ");
+				scanf(" %[^\n]", &AddObj.DriverName);
+				printf(" Номер маршрута: ");
+				scanf(" %i", &AddObj.Route);
+				AddObj.OnRoute = false;
+				Station.addBus(Obj,AddObj);
+				printf("Автобус добавлен!");
+				getch();
+				break;
+			}
+			case 2: {
+				printf("Вы выбрали: [2] Считать данные из файла\n");
+				printf("Введите имя файла с данными:\n");
+				scanf(" %[^\n]", filename);
+				if ((f1=fopen(filename,"r"))==NULL)
+					printf("Ошибка чтения файла. Попробуйте ещё раз\n");
+				else {
+					while (fscanf(f1,"%s\n",&AddObj.Number)>0) {
+						fscanf(f1,"%s\n", &AddObj.DriverName);
+						fscanf(f1,"%d",&AddObj.Route);
+						AddObj.OnRoute = false;
+						Station.addBus(Obj,AddObj);
+						printf("Автобус %s добавлен!\n",AddObj.Number);
+					}
+				}
+				getch();
+				break;
+			}
+			case 3: {
+				printf("Вы выбрали: [3] Отправить/снять автобус с рейса\n");
+				printf(" Номер автобуса: ");
+				scanf(" %[^\n]", Number);
+				Out = Station.sendBus(Obj,Number);
+				if (Out == 1)
+					printf("Автобус отправлен на маршрут\n");
+				else if (Out == 0)
+					printf("Автобус вернулся в парк\n");
+				else if (Out == -1)
+					printf("Автобус с номером %s не найден\n", Number);
+				getch();
+				break;
+			}
+			case 4: {
+				printf("Вы выбрали: [4] Список автобусов в парке\n");
+				Bus * bnew = Obj;
+				i=0;
+				while (bnew) {
+					if (!(bnew->OnRoute)) {
+						i++;
+						if (i==1) {
+							printf("+------------+---------+----------------------+\n");
+							printf("|    Номер   | Маршрут |        Водитель      |\n");
+							printf("+------------+---------+----------------------+\n");
+						}
+						printf("| %10s | %7i | %20s |\n", bnew->Number, bnew->Route, bnew->DriverName);
+					}
+					bnew = bnew->next;
+				}
+				if(i==0)
+					printf("Список пуст\n");
+				else printf("+------------+---------+----------------------+\n");
+				getch();
+				break;
+			}
+			case 5: {
+				printf("Вы выбрали: [5] Список автобусов на маршруте\n");
+				Bus * bnew = Obj;
+				i=0;
+				while (bnew) {
+					if (bnew->OnRoute) {
+						i++;
+						if (i==1) {
+							printf("+------------+---------+----------------------+\n");
+							printf("|    Номер   | Маршрут |        Водитель      |\n");
+							printf("+------------+---------+----------------------+\n");
+						}
+						printf("| %10s | %7i | %20s |\n", bnew->Number, bnew->Route, bnew->DriverName);
+					}
+					bnew = bnew->next;
+				}
+				if(i==0)
+					printf("Список пуст\n");
+				else printf("+------------+---------+----------------------+\n");
+				getch();
+				break;
+			}
+		}
+	}
+
+
+	system("pause");
+	return true;
+}
+
+void info() {
+	printf("*****************[ О ПРОГРАММЕ ]**************\n");
+	printf("* Информация: Программа является симулятором *\n");
+	printf("*             автобусного парка              *\n");
+	printf("* Авторы: Дубровский А., Синицин М.          *\n");
+	printf("* Группа: КЭ-218                             *\n");
+	printf("*           Челябинск, ЮУрГУ, 2021           *\n");
+	printf("**********************************************\n");
+}
